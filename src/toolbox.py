@@ -1,0 +1,263 @@
+from enum import Enum
+from datetime import date
+from glootil import Toolbox, DynEnum, date_to_data_tag
+from state import SQLiteState as State
+
+tb = Toolbox(
+    "gd-github-repo-explorer",
+    "GitHub Repository Explorer",
+    "Explore issues and releases for a GitHub repository",
+    state=State("./githubrepo.db"),
+)
+
+
+@tb.enum(icon="toggle")
+class Status(Enum):
+    open = "Open"
+    closed = "Closed"
+
+
+@tb.enum(icon="user")
+class Label(DynEnum):
+    @staticmethod
+    async def load(state: State):
+        return await state.query_to_tuple("select_labels", {}, id=None, name="?")
+
+
+@tb.enum(icon="user")
+class User(DynEnum):
+    @staticmethod
+    async def search(state: State, query: str = "", limit: int = 100):
+        return await state.query_to_tuple(
+            "search_users",
+            dict(query=query, limit=limit),
+            id=None,
+            username="?",
+        )
+
+    @staticmethod
+    async def find_best_match(state: State, query: str = ""):
+        return await User.search(state, query, 1)
+
+
+@tb.enum(icon="flag")
+class Milestone(DynEnum):
+    @staticmethod
+    async def search(state: State, query: str = "", limit: int = 100):
+        return await state.query_to_tuple(
+            "search_milestones", dict(query=query, limit=limit), id=None, title="?"
+        )
+
+    @staticmethod
+    async def find_best_match(state: State, query: str = ""):
+        return await Milestone.search(state, query, 1)
+
+
+@tb.enum(icon="error")
+class Issue(DynEnum):
+    @staticmethod
+    async def search(state: State, query: str = "", limit: int = 100):
+        return await state.query_to_tuple(
+            "search_issues", dict(query=query, limit=limit), id=None, title="?"
+        )
+
+    @staticmethod
+    async def find_best_match(state: State, query: str = ""):
+        return await Issue.search(state, query, 1)
+
+
+@tb.tool(
+    name="Show Issues as Table",
+    manual_update=True,
+    examples=[
+        "Show issues for the last year",
+        "Show open issues for the last 5 years",
+        "show closed issues since 2010",
+    ],
+)
+async def issues_table(
+    state: State,
+    start: date | None,
+    end: date | None,
+    status: Status | None,
+    author: User | None,
+    milestone: Milestone | None,
+):
+    tuples = await state.query_to_tuple(
+        "select_issues",
+        dict(start=start, end=end, status=status, author=author, milestone=milestone),
+        id=None,
+        title="?",
+        state="open",
+        author_id=None,
+        author_name="?",
+        milestone_id=None,
+        milestone_title="?",
+        is_locked=0,
+        comment_count=0,
+        created_at=None,
+        updated_at=None,
+        closed_at=None,
+    )
+
+    rows = []
+    for t in tuples:
+        (
+            id,
+            title,
+            state_str,
+            author_id,
+            author_name,
+            milestone_id,
+            milestone_title,
+            is_locked,
+            comment_count,
+            created_at,
+            updated_at,
+            closed_at,
+        ) = t
+        locked_label = "Yes" if is_locked else "No"
+        issue_tag = Issue(id, title).to_data_tag()
+        author_tag = User(author_id, author_name).to_data_tag() if author_id else None
+        milestone_tag = (
+            Milestone(milestone_id, milestone_title).to_data_tag()
+            if milestone_id
+            else None
+        )
+        status_tag = None
+        if state_str == "open":
+            status_tag = Status.open.to_data_tag()
+        elif state_str == "closed":
+            status_tag = Status.closed.to_data_tag()
+
+        row = (
+            issue_tag,
+            status_tag,
+            author_tag,
+            milestone_tag,
+            locked_label,
+            comment_count,
+            date_to_data_tag(created_at),
+            date_to_data_tag(updated_at),
+            date_to_data_tag(closed_at),
+        )
+        rows.append(row)
+
+    return {
+        "type": "Table",
+        "columns": [
+            {"id": "title", "label": "Issue"},
+            {"id": "state", "label": "State"},
+            {"id": "author", "label": "Author"},
+            {"id": "milestone", "label": "Milestone"},
+            {"id": "is_locked", "label": "Locked", "visible": False},
+            {"id": "comment_count", "label": "Comments"},
+            {"id": "created_at", "label": "Created"},
+            {"id": "updated_at", "label": "Updated"},
+            {"id": "closed_at", "label": "Closed"},
+        ],
+        "rows": rows,
+    }
+
+
+@tb.tool(name="Show Labels")
+async def show_labels(state: State):
+    tuples = await state.query_to_tuple(
+        "select_labels", {}, id=None, name="?", color="?", description=""
+    )
+    rows = []
+    for id, name, color, desc in tuples:
+        rows.append((Label(id, name).to_data_tag(), color, desc or ""))
+
+    return {
+        "type": "Table",
+        "columns": [
+            {"id": "name", "label": "Name"},
+            {"id": "color", "label": "Color"},
+            {"id": "description", "label": "Description"},
+        ],
+        "rows": rows,
+    }
+
+
+USERS_COLS = [
+    {"id": "username", "label": "Name"},
+    {"id": "avatar_url", "label": "Avatar URL", "visible": False},
+]
+
+
+@tb.tool(name="Show Users")
+async def show_users(state: State):
+    tuples = await state.query_to_tuple(
+        "select_all_users", {}, id=None, username="?", avatar_url=None
+    )
+    rows = []
+    for id, username, avatar_url in tuples:
+        rows.append((User(id, username).to_data_tag(), avatar_url))
+
+    return {
+        "type": "Table",
+        "columns": USERS_COLS,
+        "rows": rows,
+    }
+
+
+@tb.tool(name="Show Issue")
+async def show_issue(state: State, issue: Issue | None):
+    if not issue:
+        return "No issue selected"
+
+    row = await state.query("select_issue_by_id", dict(id=issue.name))
+    return f"""
+# [{row.get("number", "?")}] {row.get("title", "?")}
+
+- State: {row.get("state", "?")}
+- Author: {row.get("author_name", "?")}
+- Milestone: {row.get("milestone_title", "?")}
+- Locked: {row.get("is_locked", "?")}
+- Comments: {row.get("comment_count", "?")}
+- Created: {row.get("created_at", "?")}
+- Updated: {row.get("updated_at", "?")}
+- Closed: {row.get("closed_at", "?")}
+
+{row.get("body", "")}
+    """
+
+
+@tb.tool(name="Issues Activity by Day")
+async def issues_activity_by_day(state: State):
+    rows = await state.query_to_tuple(
+        "select_activity_by_day", {}, date=None, closed=0, created=0
+    )
+    return {
+        "type": "Series",
+        "title": "Issues Activity by Day",
+        "xCol": "date",
+        "valCols": ["closed", "created"],
+        "xAxisType": "time",
+        "cols": [
+            ["date", "Day"],
+            ["closed", "Closed"],
+            ["created", "Created"],
+        ],
+        "rows": rows,
+    }
+
+
+@tb.tool(name="Issue Count by Label")
+async def issue_count_by_label(state: State):
+    rows = await state.query_to_tuple(
+        "select_issue_count_by_label", {}, label="?", count=0
+    )
+
+    return {
+        "type": "Series",
+        "title": "Issue Count by Label",
+        "xCol": "label",
+        "valCols": ["count"],
+        "cols": [
+            ["label", "Label"],
+            ["count", "Count"],
+        ],
+        "rows": rows,
+    }
