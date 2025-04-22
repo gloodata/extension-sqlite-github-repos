@@ -9,9 +9,16 @@ const [
   releasesPath = "releases.json",
 ] = Bun.argv.slice(2);
 
-const octokit = new Octokit({
-  //auth: 'YOUR-TOKEN'
-});
+const octokitOpts = {};
+if (process.env.GITHUB_TOKEN) {
+  octokitOpts.auth = process.env.GITHUB_TOKEN;
+} else {
+  console.warn(
+    "GITHUB_TOKEN environment variable not set, you may get rate limited",
+  );
+}
+
+const octokit = new Octokit(octokitOpts);
 
 async function getIssues(owner, repo, per_page = 500) {
   return await octokit.paginate(octokit.rest.issues.listForRepo, {

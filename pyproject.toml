@@ -1,7 +1,7 @@
 [project]
 name = "extension-github-repo-explorer"
 version = "0.1.0"
-description = "Add your description here"
+description = "A sample gloodata extension in python using glootil to explore a gituhub repository from a sqlite database"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
