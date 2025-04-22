@@ -22,7 +22,13 @@ bun run issuesToSqlite.js react-issues.json react-releases.json ../../githubrepo
 uv run src/main.py
 ```
 
-Change port:
+Environment variables and their defaults:
+
+- `EXTENSION_PORT`: `9876`
+- `EXTENSION_HOST`: `localhost`
+- `EXTENSION_DB_PATH`: `./githubrepo.db`
+
+For example, to change the port:
 
 ```sh
 EXTENSION_PORT=6677 uv run src/main.py

@@ -1,13 +1,16 @@
+import os
 from enum import Enum
 from datetime import date
 from glootil import Toolbox, DynEnum, date_to_data_tag
 from state import SQLiteState as State
 
+db_path = os.environ.get("EXTENSION_DB_PATH", "./githubrepo.db")
+
 tb = Toolbox(
     "gd-github-repo-explorer",
     "GitHub Repository Explorer",
     "Explore issues and releases for a GitHub repository",
-    state=State("./githubrepo.db"),
+    state=State(db_path),
 )
 
 
