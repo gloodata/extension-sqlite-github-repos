@@ -16,12 +16,16 @@ tb = Toolbox(
 
 @tb.enum(icon="toggle")
 class Status(Enum):
+    """Issue status"""
+
     open = "Open"
     closed = "Closed"
 
 
 @tb.enum(icon="user")
 class Label(DynEnum):
+    """Issue label"""
+
     @staticmethod
     async def load(state: State):
         return await state.query_to_tuple("select_labels", {}, id=None, name="?")
@@ -29,6 +33,8 @@ class Label(DynEnum):
 
 @tb.enum(icon="user")
 class User(DynEnum):
+    """Github id and username"""
+
     @staticmethod
     async def search(state: State, query: str = "", limit: int = 100):
         return await state.query_to_tuple(
@@ -45,6 +51,8 @@ class User(DynEnum):
 
 @tb.enum(icon="flag")
 class Milestone(DynEnum):
+    """Repository milestone"""
+
     @staticmethod
     async def search(state: State, query: str = "", limit: int = 100):
         return await state.query_to_tuple(
@@ -58,6 +66,8 @@ class Milestone(DynEnum):
 
 @tb.enum(icon="error")
 class Issue(DynEnum):
+    """Repository issue number and title"""
+
     @staticmethod
     async def search(state: State, query: str = "", limit: int = 100):
         return await state.query_to_tuple(
@@ -72,6 +82,9 @@ class Issue(DynEnum):
 @tb.tool(
     name="Show Issues as Table",
     manual_update=True,
+    args=dict(
+        start="From", end="To", status="Status", author="Author", milestone="Milestone"
+    ),
     examples=[
         "Show issues for the last year",
         "Show open issues for the last 5 years",
@@ -86,6 +99,8 @@ async def issues_table(
     author: User | None,
     milestone: Milestone | None,
 ):
+    """Show issues in a table with filters"""
+
     tuples = await state.query_to_tuple(
         "select_issues",
         dict(start=start, end=end, status=status, author=author, milestone=milestone),
@@ -163,8 +178,10 @@ async def issues_table(
     }
 
 
-@tb.tool(name="Show Labels")
+@tb.tool(name="Show Labels", examples=["Show labels", "Show issue labels"])
 async def show_labels(state: State):
+    """Show all labels in the repository"""
+
     tuples = await state.query_to_tuple(
         "select_labels", {}, id=None, name="?", color="?", description=""
     )
@@ -183,14 +200,10 @@ async def show_labels(state: State):
     }
 
 
-USERS_COLS = [
-    {"id": "username", "label": "Name"},
-    {"id": "avatar_url", "label": "Avatar URL", "visible": False},
-]
-
-
-@tb.tool(name="Show Users")
+@tb.tool(name="Show Users", examples=["Show project contributors", "Show users"])
 async def show_users(state: State):
+    """Show a list of users related to the project"""
+
     tuples = await state.query_to_tuple(
         "select_all_users", {}, id=None, username="?", avatar_url=None
     )
@@ -200,13 +213,22 @@ async def show_users(state: State):
 
     return {
         "type": "Table",
-        "columns": USERS_COLS,
+        "columns": [
+            {"id": "username", "label": "Name"},
+            {"id": "avatar_url", "label": "Avatar URL", "visible": False},
+        ],
         "rows": rows,
     }
 
 
-@tb.tool(name="Show Issue")
+@tb.tool(
+    name="Show Issue",
+    ui_prefix="Show",
+    args=dict(issue="Issue"),
+    examples=["Show first issue", "Show issue #123"],
+)
 async def show_issue(state: State, issue: Issue | None):
+    """Show details for an issue"""
     if not issue:
         return "No issue selected"
 
@@ -229,6 +251,7 @@ async def show_issue(state: State, issue: Issue | None):
 
 @tb.tool(name="Issues Activity by Day")
 async def issues_activity_by_day(state: State):
+    """Show open/close issue count activity by day"""
     rows = await state.query_to_tuple(
         "select_activity_by_day", {}, date=None, closed=0, created=0
     )
@@ -247,8 +270,11 @@ async def issues_activity_by_day(state: State):
     }
 
 
-@tb.tool(name="Issue Count by Label")
+@tb.tool(
+    name="Issue Count by Label", examples=["Show label usage", "Show issues by label"]
+)
 async def issue_count_by_label(state: State):
+    """Show number of issues with each label"""
     rows = await state.query_to_tuple(
         "select_issue_count_by_label", {}, label="?", count=0
     )
