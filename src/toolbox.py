@@ -290,3 +290,24 @@ async def issue_count_by_label(state: State):
         ],
         "rows": rows,
     }
+
+
+@tb.tool(name="Show Milestone", ui_prefix="Show", args=dict(milestone="Milestone"))
+async def show_milestone(state: State, milestone: Milestone | None):
+    """Show details for a milestone"""
+    if not milestone:
+        return "No milestone selected"
+
+    row = await state.query("select_milestone_by_id", dict(id=milestone.name))
+
+    return f"""
+# {row.get("title", "?")}
+
+- State: {row.get("state", "?")}
+- Created: {row.get("created_at", "?")}
+- Updated: {row.get("updated_at", "?")}
+- Closed: {row.get("closed_at", "?")}
+- Due On: {row.get("due_on", "?")}
+
+{row.get("description", "")}
+    """

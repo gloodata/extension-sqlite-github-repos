@@ -137,3 +137,19 @@ GROUP BY
     l.id, l.name
 ORDER BY
     count DESC
+
+-- name: select_milestone_by_id(id)^
+
+SELECT
+    id,
+    title,
+    description,
+    created_at,
+    updated_at,
+    closed_at,
+    state,
+    due_on
+FROM
+    milestone
+WHERE
+    id = :id
