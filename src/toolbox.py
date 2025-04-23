@@ -44,10 +44,6 @@ class User(DynEnum):
             username="?",
         )
 
-    @staticmethod
-    async def find_best_match(state: State, query: str = ""):
-        return await User.search(state, query, 1)
-
 
 @tb.enum(icon="flag")
 class Milestone(DynEnum):
@@ -59,10 +55,6 @@ class Milestone(DynEnum):
             "search_milestones", dict(query=query, limit=limit), id=None, title="?"
         )
 
-    @staticmethod
-    async def find_best_match(state: State, query: str = ""):
-        return await Milestone.search(state, query, 1)
-
 
 @tb.enum(icon="error")
 class Issue(DynEnum):
@@ -73,10 +65,6 @@ class Issue(DynEnum):
         return await state.query_to_tuple(
             "search_issues", dict(query=query, limit=limit), id=None, title="?"
         )
-
-    @staticmethod
-    async def find_best_match(state: State, query: str = ""):
-        return await Issue.search(state, query, 1)
 
 
 @tb.tool(
