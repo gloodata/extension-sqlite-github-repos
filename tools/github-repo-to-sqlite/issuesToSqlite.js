@@ -1,7 +1,7 @@
 /*globals Bun*/
 import { Database } from "bun:sqlite";
 
-const [issuesPath, releasesPath, dbPath = "github.db"] = Bun.argv.slice(2);
+const [issuesPath, releasesPath, dbPath = "githubrepo.db"] = Bun.argv.slice(2);
 
 async function readJSON(path) {
   const file = Bun.file(path);
