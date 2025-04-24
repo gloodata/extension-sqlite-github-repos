@@ -60,10 +60,11 @@ WHERE
 -- name: search_issues(query, limit)
 SELECT id, title
 FROM issue
-WHERE id IN (
+WHERE number LIKE '%' || :query || '%' COLLATE NOCASE OR id IN (
     SELECT id
     FROM issue_fts
     WHERE title MATCH :query
+    LIMIT :limit
 )
 ORDER BY id
 LIMIT :limit
