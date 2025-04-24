@@ -257,6 +257,8 @@ function addMilestone({
   };
 }
 
+console.log("Inserting issues");
+let count = 0;
 for (const issue of issues) {
   const {
     id,
@@ -275,6 +277,10 @@ for (const issue of issues) {
     reactions,
     assignees,
   } = issue;
+
+  if (count % 100 == 0) {
+    console.log(`Inserted ${count} issues`);
+  }
 
   if (milestone) {
     addMilestone(milestone);
@@ -327,6 +333,8 @@ for (const issue of issues) {
       err,
     );
   }
+
+  count += 1;
 }
 
 db.run(`CREATE VIRTUAL TABLE IF NOT EXISTS issue_fts USING fts5(id, title)`);
@@ -336,11 +344,13 @@ INSERT INTO issue_fts (id, title)
 SELECT id, title FROM issue
 `);
 
+console.log("Inserting users");
 for (const user of Object.values(users)) {
   const { id, username, avatar_url } = user;
   insertUser(id, username, avatar_url);
 }
 
+console.log("Inserting milestones");
 for (const milestone of Object.values(milestones)) {
   const {
     id,
@@ -365,6 +375,7 @@ for (const milestone of Object.values(milestones)) {
   );
 }
 
+console.log("Inserting releases");
 for (const release of releases) {
   const {
     id,
@@ -394,4 +405,5 @@ for (const release of releases) {
   );
 }
 
+console.log("done!");
 db.close();

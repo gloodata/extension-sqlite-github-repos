@@ -9,9 +9,9 @@ First you need to generate the `githubrepo.db` file using the scripts in `tools/
 Feel free to change the exported repository, here we are going to export the [facebook/react](https://github.com/facebook/react) repo:
 
 ```sh
+cd tools/github-repo-to-sqlite
 # get your token here https://github.com/settings/tokens
 export GIHUB_TOKEN="YOUR TOKEN HERE"
-cd tools/github-repo-to-sqlite
 bun run dumpRepo.js facebook react react-issues.json react-releases.json
 bun run issuesToSqlite.js react-issues.json react-releases.json ../../githubrepo.db
 ```
