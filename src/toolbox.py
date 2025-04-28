@@ -88,11 +88,11 @@ async def issues_table(
     milestone: Milestone | None,
 ):
     """Show issues in a table with filters"""
-
     tuples = await state.query_to_tuple(
         "select_issues",
         dict(start=start, end=end, status=status, author=author, milestone=milestone),
         id=None,
+        number=-1,
         title="?",
         state="open",
         author_id=None,
@@ -110,6 +110,7 @@ async def issues_table(
     for t in tuples:
         (
             id,
+            number,
             title,
             state_str,
             author_id,
@@ -137,6 +138,7 @@ async def issues_table(
             status_tag = Status.closed.to_data_tag()
 
         row = (
+            number,
             issue_tag,
             status_tag,
             author_tag,
@@ -152,15 +154,16 @@ async def issues_table(
     return {
         "type": "Table",
         "columns": [
+            {"id": "number", "label": "#"},
             {"id": "title", "label": "Issue"},
             {"id": "state", "label": "State"},
             {"id": "author", "label": "Author"},
-            {"id": "milestone", "label": "Milestone"},
+            {"id": "milestone", "label": "Milestone", "visible": False},
             {"id": "is_locked", "label": "Locked", "visible": False},
             {"id": "comment_count", "label": "Comments"},
             {"id": "created_at", "label": "Created"},
-            {"id": "updated_at", "label": "Updated"},
-            {"id": "closed_at", "label": "Closed"},
+            {"id": "updated_at", "label": "Updated", "visible": False},
+            {"id": "closed_at", "label": "Closed", "visible": False},
         ],
         "rows": rows,
     }
