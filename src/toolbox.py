@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from datetime import date
+from datetime import datetime, date
 from glootil import Toolbox, DynEnum, date_to_data_tag
 from state import SQLiteState as State
 
@@ -224,17 +224,21 @@ async def show_issue(state: State, issue: Issue | None):
         return "No issue selected"
 
     row = await state.query("select_issue_by_id", dict(id=issue.name))
+
+    locked_label = "Yes" if row.get("is_locked") else "No"
+    author_name = row.get("author_name", "?")
+
     return f"""
 # [{row.get("number", "?")}] {row.get("title", "?")}
 
 - State: {row.get("state", "?")}
-- Author: {row.get("author_name", "?")}
+- Author: [@{author_name}](https://github.com/{author_name})
 - Milestone: {row.get("milestone_title", "?")}
-- Locked: {row.get("is_locked", "?")}
+- Locked: {locked_label}
 - Comments: {row.get("comment_count", "?")}
-- Created: {row.get("created_at", "?")}
-- Updated: {row.get("updated_at", "?")}
-- Closed: {row.get("closed_at", "?")}
+- Created: {format_date_row(row, "created_at")}
+- Updated: {format_date_row(row, "updated_at")}
+- Closed: {format_date_row(row, "closed_at", "No")}
 
 {row.get("body", "")}
     """
@@ -282,6 +286,12 @@ async def issue_count_by_label(state: State):
         "rows": rows,
     }
 
+def format_date_row(row, name, default="?"):
+    iso_date = row.get(name)
+    if iso_date:
+        return datetime.fromisoformat(iso_date).strftime("%Y-%m-%d %H:%M")
+    else:
+        return default
 
 @tb.tool(name="Show Milestone", ui_prefix="Show", args=dict(milestone="Milestone"))
 async def show_milestone(state: State, milestone: Milestone | None):
@@ -295,10 +305,10 @@ async def show_milestone(state: State, milestone: Milestone | None):
 # {row.get("title", "?")}
 
 - State: {row.get("state", "?")}
-- Created: {row.get("created_at", "?")}
-- Updated: {row.get("updated_at", "?")}
-- Closed: {row.get("closed_at", "?")}
-- Due On: {row.get("due_on", "?")}
+- Created: {format_date_row(row, "created_at")}
+- Updated: {format_date_row(row, "updated_at")}
+- Closed: {format_date_row(row, "closed_at", "No")}
+- Due On: {format_date_row(row, "due_on", "Not Due")}
 
 {row.get("description", "")}
     """
