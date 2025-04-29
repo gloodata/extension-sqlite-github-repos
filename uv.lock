@@ -84,7 +84,7 @@ requires-dist = [
     { name = "aiosql", specifier = ">=13.4" },
     { name = "aiosqlite", specifier = ">=0.21.0" },
     { name = "fastapi", specifier = ">=0.115.12" },
-    { name = "glootil", specifier = ">=0.2.0" },
+    { name = "glootil", specifier = ">=0.2.2" },
     { name = "uvicorn", specifier = ">=0.34.2" },
 ]
 
@@ -104,11 +104,11 @@ wheels = [
 
 [[package]]
 name = "glootil"
-version = "0.2.0"
+version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4a/4f/92d68af3cf1f77919006d75eccc38c8e431171e4e785909d1e9fb0923c5a/glootil-0.2.0.tar.gz", hash = "sha256:d350386f503521e2695cd49ea82a4dd6c908f20f6afa10553f9f8b2b6ee55413", size = 20787, upload_time = "2025-04-24T08:57:19.505Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/5d/ba2ae365bab4875fc06349f2df3e21ab910a10c358af3e6111381786f1ac/glootil-0.2.2.tar.gz", hash = "sha256:bcb23de296fabf213e71523d742ddd44e5941c4bbe441c3d3e1a1eaddc8c4776", size = 21122, upload_time = "2025-04-28T14:56:42.084Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/cb/618ad5d82fc9c3bd372abb085967c7c501480d10686edf5bdd0eb2ff4021/glootil-0.2.0-py3-none-any.whl", hash = "sha256:a31987dbdb00c7feff5de6f15c3b6f7df82da41b844c44ae9bccf932a0aadf54", size = 12667, upload_time = "2025-04-24T08:57:17.902Z" },
+    { url = "https://files.pythonhosted.org/packages/36/0f/5c4cd0fbf2937e7492609841e17f22332b9ff982ef213915aed2800cb932/glootil-0.2.2-py3-none-any.whl", hash = "sha256:586b5cfd3e6e79a4a958bd179e862d18240dd5a9ea312e7879932a55e329af9b", size = 12899, upload_time = "2025-04-28T14:56:40.711Z" },
 ]
 
 [[package]]
