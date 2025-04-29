@@ -60,6 +60,13 @@ WHERE
 -- name: search_issues(query, limit)
 SELECT id, title
 FROM issue
+WHERE number LIKE '%' || :query || '%' COLLATE NOCASE OR title LIKE '%' || :query || '%' COLLATE NOCASE
+ORDER BY id
+LIMIT :limit
+
+-- name: full_search_issues(query, limit)
+SELECT id, title
+FROM issue
 WHERE number LIKE '%' || :query || '%' COLLATE NOCASE OR id IN (
     SELECT id
     FROM issue_fts

@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from datetime import datetime, date
-from glootil import Toolbox, DynEnum, date_to_data_tag
+from glootil import Toolbox, DynEnum, date_to_data_tag, ContextActionInfo
 from state import SQLiteState as State
 
 db_path = os.environ.get("EXTENSION_DB_PATH", "./githubrepo.db")
@@ -155,7 +155,7 @@ async def issues_table(
         "type": "Table",
         "columns": [
             {"id": "number", "label": "#"},
-            {"id": "title", "label": "Issue"},
+            {"id": "issue", "label": "Issue"},
             {"id": "state", "label": "State"},
             {"id": "author", "label": "Author"},
             {"id": "milestone", "label": "Milestone", "visible": False},
@@ -244,6 +244,11 @@ async def show_issue(state: State, issue: Issue | None):
     """
 
 
+@tb.context_action(tool=show_issue, target=Issue)
+def show_issue_for_issue(ctx: ContextActionInfo):
+    return {"args": {"issue": ctx.value.get("label")}}
+
+
 @tb.tool(name="Issues Activity by Day")
 async def issues_activity_by_day(state: State):
     """Show open/close issue count activity by day"""
@@ -286,12 +291,14 @@ async def issue_count_by_label(state: State):
         "rows": rows,
     }
 
+
 def format_date_row(row, name, default="?"):
     iso_date = row.get(name)
     if iso_date:
         return datetime.fromisoformat(iso_date).strftime("%Y-%m-%d %H:%M")
     else:
         return default
+
 
 @tb.tool(name="Show Milestone", ui_prefix="Show", args=dict(milestone="Milestone"))
 async def show_milestone(state: State, milestone: Milestone | None):
