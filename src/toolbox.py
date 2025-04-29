@@ -3,6 +3,7 @@ from enum import Enum
 from datetime import datetime, date
 from glootil import Toolbox, DynEnum, date_to_data_tag, ContextActionInfo
 from state import SQLiteState as State
+import httpx
 
 db_path = os.environ.get("EXTENSION_DB_PATH", "./githubrepo.db")
 
@@ -212,6 +213,73 @@ async def show_users(state: State):
     }
 
 
+@tb.tool(name="Show User", examples=["user info for mofeiZ", "Show user @eps1lon"])
+async def show_user(user: User | None):
+    """Show details for a user"""
+    if not user:
+        return "No user selected"
+
+    async with httpx.AsyncClient() as client:
+        url = f"https://api.github.com/users/{user.value}"
+        response = await client.get(url)
+        if response.status_code == 200:
+            data = response.json()
+
+            html_url = data.get("html_url")
+
+            user_type = data.get("type")
+            name = data.get("name")
+            company = data.get("company")
+            blog = data.get("blog")
+            location = data.get("location")
+            email = data.get("email") or ""
+            bio = data.get("bio") or ""
+            followers = data.get("followers")
+            following = data.get("following")
+            created_at = format_date(data.get("created_at"))
+            public_repos = data.get("public_repos")
+            public_gists = data.get("public_gists")
+
+            return {
+                "type": "InfoBox",
+                "columns": [
+                    {"id": "user_type", "label": "Type"},
+                    {"id": "name", "label": "Name"},
+                    {"id": "company", "label": "Company"},
+                    {"id": "blog", "label": "Blog"},
+                    {"id": "location", "label": "Location"},
+                    {"id": "email", "label": "Email"},
+                    {"id": "bio", "label": "Bio"},
+                    {"id": "followers", "label": "Followers"},
+                    {"id": "following", "label": "Following"},
+                    {"id": "created_at", "label": "Created At"},
+                    {"id": "public_repos", "label": "Public Repos"},
+                    {"id": "public_gists", "label": "Public Gists"},
+                ],
+                "row": [
+                    user_type,
+                    url_tag_value(name, html_url),
+                    company,
+                    url_tag_value(blog, blog),
+                    location,
+                    email,
+                    bio,
+                    followers,
+                    following,
+                    created_at,
+                    public_repos,
+                    public_gists,
+                ],
+            }
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+
+
+@tb.context_action(tool=show_user, target=User)
+def show_user_for_user(ctx: ContextActionInfo):
+    return {"args": {"user": ctx.value.get("label")}}
+
+
 @tb.tool(
     name="Show Issue",
     ui_prefix="Show",
@@ -294,10 +362,16 @@ async def issue_count_by_label(state: State):
 
 def format_date_row(row, name, default="?"):
     iso_date = row.get(name)
+    return format_date(iso_date, default)
+
+def format_date(iso_date, default="?"):
     if iso_date:
         return datetime.fromisoformat(iso_date).strftime("%Y-%m-%d %H:%M")
     else:
         return default
+
+def url_tag_value(value, url):
+    return ["link", { "url": url, "label": value}]
 
 
 @tb.tool(name="Show Milestone", ui_prefix="Show", args=dict(milestone="Milestone"))
