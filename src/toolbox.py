@@ -328,10 +328,11 @@ def show_issue_for_issue(ctx: ContextActionInfo):
 
 
 @tb.tool(name="Issues Activity by Day")
-async def issues_activity_by_day(state: State):
+async def issues_activity_by_day(state: State, user: User | None):
     """Show open/close issue count activity by day"""
+    user_id = user.name if user else None
     rows = await state.query_to_tuple(
-        "select_activity_by_day", {}, date=None, closed=0, created=0
+        "select_activity_by_day", {"user_id": user_id}, date=None, closed=0, created=0
     )
     return {
         "type": "Series",
@@ -346,6 +347,11 @@ async def issues_activity_by_day(state: State):
         ],
         "rows": rows,
     }
+
+
+@tb.context_action(tool=issues_activity_by_day, target=User)
+def show_issues_activity_for_user(ctx: ContextActionInfo):
+    return {"args": {"user": ctx.value.get("label")}}
 
 
 @tb.tool(

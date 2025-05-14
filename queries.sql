@@ -100,7 +100,7 @@ SELECT id, name, color, description
 FROM label
 ORDER BY name
 
--- name: select_activity_by_day()
+-- name: select_activity_by_day(user_id)
 SELECT
     date,
     SUM(closed_count) AS closed,
@@ -113,7 +113,8 @@ FROM (
     FROM
         issue
     WHERE
-        closed_at IS NOT NULL
+        closed_at IS NOT NULL AND
+        (:user_id IS NULL OR author_id = :user_id)
     GROUP BY
         DATE(closed_at)
 
@@ -125,6 +126,8 @@ FROM (
         COUNT(*) AS created_count
     FROM
         issue
+    WHERE
+        :user_id IS NULL OR author_id = :user_id
     GROUP BY
         DATE(created_at)
 ) AS counts
