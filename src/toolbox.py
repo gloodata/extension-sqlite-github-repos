@@ -69,7 +69,7 @@ class Issue(DynEnum):
 
 
 @tb.tool(
-    name="Show Issues as Table",
+    name="Show Issues",
     manual_update=True,
     args=dict(
         start="From", end="To", status="Status", author="Author", milestone="Milestone"
@@ -280,6 +280,16 @@ def show_user_for_user(ctx: ContextActionInfo):
     return {"args": {"user": ctx.value.get("label")}}
 
 
+@tb.context_action(tool=issues_table, target=User)
+def show_issues_for_user(ctx: ContextActionInfo):
+    return {"args": {"author": ctx.value.get("label")}}
+
+
+@tb.context_action(tool=issues_table, target=Status)
+def show_issues_for_status(ctx: ContextActionInfo):
+    return {"args": {"status": ctx.value.get("label")}}
+
+
 @tb.tool(
     name="Show Issue",
     ui_prefix="Show",
@@ -364,14 +374,16 @@ def format_date_row(row, name, default="?"):
     iso_date = row.get(name)
     return format_date(iso_date, default)
 
+
 def format_date(iso_date, default="?"):
     if iso_date:
         return datetime.fromisoformat(iso_date).strftime("%Y-%m-%d %H:%M")
     else:
         return default
 
+
 def url_tag_value(value, url):
-    return ["link", { "url": url, "label": value}]
+    return ["link", {"url": url, "label": value}]
 
 
 @tb.tool(name="Show Milestone", ui_prefix="Show", args=dict(milestone="Milestone"))
