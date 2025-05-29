@@ -4,7 +4,21 @@ A Python extension for [Gloodata](https://gloodata.com/) to explore a github rep
 
 ![Extension Preview](https://raw.githubusercontent.com/gloodata/extension-github-repo-explorer/refs/heads/main/resources/ext-preview.webp)
 
-# Setup
+## Setup
+
+### Prerequisites
+
+- Python 3.12 or higher
+- [uv](https://docs.astral.sh/uv/)
+- [Gloodata](https://gloodata.com/download/)
+
+Check that you are in a recent version of `uv`:
+
+```bash
+uv self update
+```
+
+### Project Setup
 
 First you need to generate the `githubrepo.db` file using the scripts in `tools/github-repo-to-sqlite`.
 
@@ -18,7 +32,9 @@ bun run dumpRepo.js facebook react react-issues.json react-releases.json
 bun run issuesToSqlite.js react-issues.json react-releases.json ../../githubrepo.db
 ```
 
-# Run
+[GitHub docs: Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+
+## Run
 
 Check that you are in a recent version of `uv`:
 
@@ -42,16 +58,16 @@ For example, to change the port:
 EXTENSION_PORT=6677 uv run src/main.py
 ```
 
-# Adding New Visualizations
+## Adding New Visualizations
 
 1. Define new SQL queries in `queries.sql`
 2. Create tool functions in `src/toolbox.py` using the `@tb.tool` decorator
 3. Specify visualization types and parameters in the return dictionary
 
-# License
+## License
 
 This project is open source and available under the [MIT License](LICENSE).
 
-# Support
+## Support
 
 For questions, issues, or contributions, please open an issue on GitHub or contact the maintainers.
