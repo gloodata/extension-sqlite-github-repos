@@ -36,12 +36,6 @@ bun run issuesToSqlite.js react-issues.json react-releases.json ../../githubrepo
 
 ## Run
 
-Check that you are in a recent version of `uv`:
-
-```bash
-uv self update
-```
-
 ```sh
 uv run src/main.py
 ```
