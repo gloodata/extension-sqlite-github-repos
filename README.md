@@ -2,7 +2,10 @@
 
 A Python extension for [Gloodata](https://gloodata.com/) to explore a github repository from a sqlite database.
 
+[🎥 Watch Youtube Demo](https://www.youtube.com/watch?v=EV5E5gR5oKM)
+
 ![Extension Preview](https://raw.githubusercontent.com/gloodata/extension-github-repo-explorer/refs/heads/main/resources/ext-preview.webp)
+
 
 ## Setup
 
