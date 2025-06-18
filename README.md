@@ -1,6 +1,6 @@
 # Github Repo Explorer (Gloodata Extension)
 
-A Python extension for [Gloodata](https://gloodata.com/) to explore a github repository from a sqlite database.
+ A Python extension for [Gloodata](https://gloodata.com/) that lets you explore GitHub repositories stored in a local SQLite database. Designed for LLM-based interactions: query repo metadata, commits, and file trees through natural language, no UI needed.
 
 [🎥 Watch Youtube Demo](https://www.youtube.com/watch?v=EV5E5gR5oKM)
 
